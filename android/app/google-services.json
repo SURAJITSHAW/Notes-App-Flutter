@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "377806584339",
+    "project_id": "mynotes-surajit",
+    "storage_bucket": "mynotes-surajit.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:377806584339:android:a414ba83e8151769561de6",
+        "android_client_info": {
+          "package_name": "com.flutter.surajitshaw"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAmx6BPCKk5xi4m_YXl2wfybVEHziA4VHE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
