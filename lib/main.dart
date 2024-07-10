@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mynotes/registration_screen.dart';
+import 'package:mynotes/views/login_screen.dart';
+import 'package:mynotes/views/registration_screen.dart';
 
 
 void main() {
@@ -23,7 +24,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const RegisterationPage(),
+      home: const LoginPage(),
     );
   }
 }
