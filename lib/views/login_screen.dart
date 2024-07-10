@@ -71,7 +71,7 @@ class _LoginPageState extends State<LoginPage> {
 class LoginForm extends StatelessWidget {
 
 // ! custom methdo: create firebase user
-  void _createUser() async {
+  void _signInUser() async {
     try {
       UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: _emailController.text,
@@ -81,7 +81,7 @@ class LoginForm extends StatelessWidget {
       print('Signed in successfully');
     } on FirebaseAuthException catch (e) {
       // Handle error
-      print("Error: $e");
+      print("$e.");
     }
   }
 
@@ -123,7 +123,7 @@ class LoginForm extends StatelessWidget {
           height: 8.0,
         ),
         TextButton(
-            onPressed: _createUser,
+            onPressed: _signInUser,
             child: const Text("Login"))
       ],
     );

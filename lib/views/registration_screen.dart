@@ -81,7 +81,7 @@ class RegistrationForm extends StatelessWidget {
       print("User created: ${userCredential.user!.email}");
     } on FirebaseAuthException catch (e) {
       // Handle error
-      print("Error: $e");
+      print("$e");
     }
   }
 
