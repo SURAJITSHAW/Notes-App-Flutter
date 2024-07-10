@@ -2,10 +2,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:mynotes/firebase_options.dart';
+import 'package:mynotes/views/home_screen.dart';
+import 'package:mynotes/views/login_screen.dart';
+import 'package:mynotes/views/registration_screen.dart';
 import 'package:mynotes/views/verify_email.dart';
 
 void main() {
-  // ! ensuring flutter framewrok initalized before anything else started
+  // Ensure the Flutter framework is initialized before anything else starts
   WidgetsFlutterBinding.ensureInitialized();
 
   runApp(const MyApp());
@@ -24,59 +27,60 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const HomePage(),
+      home: const InitializerWidget(),
+      routes: {
+        '/register': (context) => const RegisterationPage(),
+        '/login': (context) => const LoginPage(),
+        '/verify-email': (context) => const VerifyEmailPage(),
+        '/home': (context) => const HomePage(),
+      },
     );
   }
 }
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+class InitializerWidget extends StatefulWidget {
+  const InitializerWidget({super.key});
+
+  @override
+  State<InitializerWidget> createState() => _InitializerWidgetState();
+}
+
+class _InitializerWidgetState extends State<InitializerWidget> {
+  @override
+  void initState() {
+    super.initState();
+    initializeFirebase();
+  }
+
+  void initializeFirebase() async {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    checkUserStatus();
+  }
+
+  void checkUserStatus() {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      if (user.emailVerified) {
+        Navigator.of(context).pushReplacementNamed('/home');
+      } else {
+        Navigator.of(context).pushReplacementNamed('/verify-email');
+      }
+    } else {
+      Navigator.of(context).pushReplacementNamed('/login');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          "Home",
-          style: TextStyle(
-            color: Colors.white,
-          ),
-        ),
-        backgroundColor: Colors.blueAccent,
-      ),
-      body: FutureBuilder(
-        future: Firebase.initializeApp(
-          options: DefaultFirebaseOptions.currentPlatform,
-        ),
-        builder: (context, snapshot) {
-          switch (snapshot.connectionState) {
-            case ConnectionState.done:
-              final user = FirebaseAuth.instance.currentUser;
-              if (user?.emailVerified ?? false) {
-                return const Center(child: Text("Email is verified"));
-              } else {
-                // Navigate after the build completes
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const VerifyEmail(),
-                    ),
-                  );
-                });
-                return const Center(
-                    child: Text("Redirecting to verify email..."));
-              }
-            case ConnectionState.waiting:
-              return const Center(child: CircularProgressIndicator());
-            default:
-              if (snapshot.hasError) {
-                return const Center(child: Text("Error initializing Firebase"));
-              } else {
-                return const Center(child: Text("Loading..."));
-              }
-          }
-        },
+    return const Scaffold(
+      body: Center(
+        child: CircularProgressIndicator(),
       ),
     );
   }
 }
+
+

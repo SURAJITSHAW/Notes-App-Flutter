@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:mynotes/firebase_options.dart';
+import 'package:mynotes/views/home_screen.dart';
+import 'package:mynotes/views/registration_screen.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -11,57 +11,30 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  late final _emailController;
-  late final _passwordController;
+  late final TextEditingController _emailController;
+  late final TextEditingController _passwordController;
 
   @override
   void initState() {
     super.initState();
-
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
-  }
-
-  
-  // ! custom firebase init method
-  Future<FirebaseApp> _firebaseInit() {
-    // ! before using the firebase had to intialize it
-    return Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Login'),
-        backgroundColor: const Color.fromARGB(255, 167, 137, 250),
+        title: const Text('Login', style: TextStyle(
+          color: Colors.white
+        ),),
+        backgroundColor: Colors.deepPurple,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: FutureBuilder(
-          future: _firebaseInit(),
-          builder: (context, snapshot) {
-            // Check for errors
-            if (snapshot.hasError) {
-              return Center(
-                child: Text('Error: ${snapshot.error}'),
-              );
-            }
-
-            // Once complete, show the main application
-            if (snapshot.connectionState == ConnectionState.done) {
-              return LoginForm(
-                  emailController: _emailController,
-                  passwordController: _passwordController);
-            }
-
-            // Otherwise, show a loading spinner
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          },
+        child: LoginForm(
+          emailController: _emailController,
+          passwordController: _passwordController,
         ),
       ),
     );
@@ -69,63 +42,118 @@ class _LoginPageState extends State<LoginPage> {
 }
 
 class LoginForm extends StatelessWidget {
-
-// ! custom methdo: create firebase user
-  void _signInUser() async {
-    try {
-      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _emailController.text,
-        password: _passwordController.text,
-      );
-       // Handle successful sign-in
-      print('Signed in successfully');
-    } on FirebaseAuthException catch (e) {
-      // Handle error
-      print("$e.");
-    }
-  }
-
-
   const LoginForm({
     super.key,
-    required emailController,
-    required passwordController,
-  })  : _emailController = emailController,
-        _passwordController = passwordController;
+    required this.emailController,
+    required this.passwordController,
+  });
 
-  final _emailController;
-  final _passwordController;
+  final TextEditingController emailController;
+  final TextEditingController passwordController;
+
+  Future<void> _signInUser(BuildContext context) async {
+  try {
+    await FirebaseAuth.instance.signInWithEmailAndPassword(
+      email: emailController.text,
+      password: passwordController.text,
+    );
+    print('Signed in successfully');
+
+    // Navigate to Home Page
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => const HomePage(),
+      ),
+    );
+
+  } on FirebaseAuthException catch (e) {
+    print(e);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(e.message ?? 'An error occurred'),
+      ),
+    );
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        TextField(
-          keyboardType: TextInputType.emailAddress,
-          enableSuggestions: false,
-          controller: _emailController,
-          decoration: const InputDecoration(
-            hintText: "Email",
-          ),
+    return Center(
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            const Text(
+              'Welcome Back!',
+              style: TextStyle(
+                fontSize: 24.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16.0),
+            _buildTextField(
+              controller: emailController,
+              labelText: 'Email',
+              icon: Icons.email,
+              keyboardType: TextInputType.emailAddress,
+            ),
+            const SizedBox(height: 16.0),
+            _buildTextField(
+              controller: passwordController,
+              labelText: 'Password',
+              icon: Icons.lock,
+              obscureText: true,
+            ),
+            const SizedBox(height: 24.0),
+            ElevatedButton(
+              onPressed: () => _signInUser(context),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 12.0),
+                backgroundColor: Colors.deepPurple,
+              ),
+              child: const Text(
+                'Login',
+                style: TextStyle(fontSize: 18.0, color: Colors.white),
+              ),
+            ),
+            const SizedBox(height: 16.0),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (context) => const RegisterationPage(),
+                  ),
+                );
+              },
+              child: const Text(
+                "Don't have an account? Register",
+                style: TextStyle(fontSize: 16.0, color: Colors.deepPurple),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(
-          height: 8.0,
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String labelText,
+    required IconData icon,
+    bool obscureText = false,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      obscureText: obscureText,
+      decoration: InputDecoration(
+        prefixIcon: Icon(icon, color: Colors.deepPurple),
+        labelText: labelText,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
         ),
-        TextField(
-          enableSuggestions: false,
-          obscureText: true,
-          controller: _passwordController,
-          decoration: const InputDecoration(
-            hintText: "Password",
-          ),
-        ),
-        const SizedBox(
-          height: 8.0,
-        ),
-        TextButton(
-            onPressed: _signInUser,
-            child: const Text("Login"))
-      ],
+      ),
     );
   }
 }
